@@ -17,4 +17,4 @@ jobs:
       - run: yarn format:check
       - run: yarn lint
       - run: yarn build
-      - run: yarn test --code-coverage --no-watch
+      - run: yarn test --project ngx-css-anim --code-coverage --no-watch
