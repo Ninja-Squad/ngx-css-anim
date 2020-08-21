@@ -1,0 +1,55 @@
+<div class="container mt-5">
+  <div class="text-right">
+    <div class="custom-control custom-switch">
+      <input
+        type="checkbox"
+        class="custom-control-input"
+        id="toggle-animations"
+        [(ngModel)]="animationsEnabled"
+      />
+      <label class="custom-control-label" for="toggle-animations">Enable animations</label>
+    </div>
+  </div>
+
+  <div class="d-flex align-items-center flex-column my-2">
+    <div class="border rounded mb-4 p-2" [cssAnimate]="slideInAnimation" [animateOnInit]="true">
+      I'll slide in when the component is initialized
+    </div>
+  </div>
+
+  <hr />
+
+  <div class="d-flex align-items-center flex-column my-2">
+    <div class="border rounded mb-4 p-2" [cssAnimate]="shakeAnimation" #toShake="cssAnimate">
+      I'll shake when the button is clicked
+    </div>
+    <div>
+      <button type="button" class="btn btn-primary" (click)="toShake.animate()">Shake it!</button>
+    </div>
+  </div>
+
+  <hr />
+
+  <div class="d-flex align-items-center flex-column my-2">
+    <ng-container *ngIf="showBump; else resetBump">
+      <div
+        class="border rounded mb-4 p-2"
+        [cssAnimate]="bumpAnimation"
+        #toBump="cssAnimate"
+        (animationEnd)="showBump = false"
+      >
+        I'll bump and then disappear
+      </div>
+      <div>
+        <button type="button" class="btn btn-primary" (click)="toBump.animate()">Bump it!</button>
+      </div>
+    </ng-container>
+    <ng-template #resetBump>
+      <div>
+        <button type="button" class="btn btn-outline-primary" (click)="showBump = true">
+          Reset
+        </button>
+      </div>
+    </ng-template>
+  </div>
+</div>
