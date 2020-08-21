@@ -3,6 +3,7 @@ import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { Component } from '@angular/core';
 import { ComponentTester, speculoosMatchers, TestButton, TestHtmlElement } from 'ngx-speculoos';
 import { AnimationConfig, NgxCssAnimModule } from 'ngx-css-anim';
+import { Observable } from 'rxjs';
 
 @Component({
   template: `
@@ -12,7 +13,8 @@ import { AnimationConfig, NgxCssAnimModule } from 'ngx-css-anim';
       (animationEnd)="done = true"
       #div="anImate"
     ></div>
-    <button (click)="div.animate()"></button>
+    <button id="animate-button" (click)="div.animateNow()"></button>
+    <button id="do-something-button" (click)="doSomething(div.animate())"></button>
   `,
   styles: [
     `
@@ -36,6 +38,11 @@ class TestComponent {
   animation = classBasedAnimation('foo');
   onInit = false;
   done = false;
+  somethingDone = false;
+
+  doSomething(animation$: Observable<void>): void {
+    animation$.subscribe(() => (this.somethingDone = true));
+  }
 }
 
 class TestComponentTester extends ComponentTester<TestComponent> {
@@ -48,7 +55,11 @@ class TestComponentTester extends ComponentTester<TestComponent> {
   }
 
   get animateButton(): TestButton {
-    return this.button('button');
+    return this.button('#animate-button');
+  }
+
+  get doSomethingButton(): TestButton {
+    return this.button('#do-something-button');
   }
 }
 
@@ -103,4 +114,20 @@ describe('animate directive', () => {
     expect(tester.div).not.toHaveClass('foo');
     expect(tester.componentInstance.done).toBeTrue();
   });
+
+  it('should do something after the animation is don', fakeAsync(() => {
+    tester.detectChanges();
+
+    tester.doSomethingButton.click();
+
+    expect(tester.div).toHaveClass('foo');
+    expect(tester.componentInstance.done).toBeFalse();
+    expect(tester.componentInstance.somethingDone).toBeFalse();
+
+    tick(350);
+
+    expect(tester.div).not.toHaveClass('foo');
+    expect(tester.componentInstance.done).toBeTrue();
+    expect(tester.componentInstance.somethingDone).toBeTrue();
+  }));
 });

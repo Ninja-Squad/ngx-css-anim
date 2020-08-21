@@ -1,6 +1,8 @@
 import { AfterViewInit, Directive, ElementRef, Input, Output, EventEmitter } from '@angular/core';
 import { AnimationConfig } from './animation-config.service';
 import { CssAnimation, animate } from './animation';
+import { Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
 
 /**
  * Directive allowing to animate its host element.
@@ -12,10 +14,10 @@ import { CssAnimation, animate } from './animation';
  * @Component({
  *   template: `
  *     <div [anImate]="shakeAnimation" #toShake="anImate">I'll shake when the button is clicked</div>
- *     <button type="button" (click)="toShake.animate()">Shake the div</button>
+ *     <button type="button" (click)="toShake.animateNow()">Shake the div</button>
  *   `
  * }
- * class MyComponent implements AfterViewInit {
+ * class MyComponent {
  *   shakeAnimation = classBasedAnimation('shake');
  * }
  * ```
@@ -26,8 +28,29 @@ import { CssAnimation, animate } from './animation';
  * @Component({
  *   template: `<div [anImate]="shakeAnimation" [animateOnInit]="true">I'll shake when the component view is initialized</div>`
  * }
- * class MyComponent implements AfterViewInit {
+ * class MyComponent {
  *   shakeAnimation = classBasedAnimation('shake');
+ * }
+ * ```
+ *
+ * Often, clicking a button must do more than just executing an animation. To combine an additional
+ * treatment with the animation, you can call `animate()` instead of `animateNow()`, and pass the returned cold observable
+ * to a method of the component, which can then use RxJS to do something else once the animation is done, or while the animation
+ * is running.
+ *
+ * ```
+ * @Component({
+ *   template: `
+ *     <div [anImate]="shakeAnimation" #toShake="anImate">I'll shake when the button is clicked</div>
+ *     <button type="button" (click)="doSomething(toShake.animateNow())">Shake the div</button>
+ *   `
+ * }
+ * class MyComponent {
+ *   shakeAnimation = classBasedAnimation('shake');
+ *
+ *   doSomething(animation$: Observable<void>) {
+ *     animations$.subscribe(() => doSomethingAfterAnimation());
+ *   }
  * }
  * ```
  */
@@ -36,26 +59,45 @@ import { CssAnimation, animate } from './animation';
   exportAs: 'anImate'
 })
 export class AnimateDirective implements AfterViewInit {
+  /**
+   * The CssAnimation that the directive must execute
+   */
   @Input('anImate') animation: CssAnimation;
+
+  /**
+   * If true, the animation is executed when the view of the directive is initialized
+   */
   @Input() animateOnInit: boolean;
+
+  /**
+   * Emits when the animation ends
+   */
   @Output() readonly animationEnd = new EventEmitter<void>();
 
   constructor(private config: AnimationConfig, private elementRef: ElementRef) {}
 
   /**
-   * Executes the animation on the host element of the directive
+   * Returns an observable which executes the animation on the host element of the directive when subscribed
    */
-  animate(): void {
-    animate(
+  animate(): Observable<void> {
+    const animationToExecute = this.animation;
+    return animate(
       this.elementRef.nativeElement,
-      this.animation,
+      animationToExecute,
       this.config.animationsDisabled
-    ).subscribe(() => this.animationEnd.emit());
+    ).pipe(tap(() => this.animationEnd.emit()));
+  }
+
+  /**
+   * Executes the animation immediately on the host element of the directive
+   */
+  animateNow(): void {
+    this.animate().subscribe();
   }
 
   ngAfterViewInit(): void {
     if (this.animateOnInit) {
-      this.animate();
+      this.animateNow();
     }
   }
 }

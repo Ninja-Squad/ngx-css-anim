@@ -24,7 +24,9 @@
       I'll shake when the button is clicked
     </div>
     <div>
-      <button type="button" class="btn btn-primary" (click)="toShake.animate()">Shake it!</button>
+      <button type="button" class="btn btn-primary" (click)="toShake.animateNow()">
+        Shake it!
+      </button>
     </div>
   </div>
 
@@ -41,7 +43,9 @@
         I'll bump and then disappear
       </div>
       <div>
-        <button type="button" class="btn btn-primary" (click)="toBump.animate()">Bump it!</button>
+        <button type="button" class="btn btn-primary" (click)="toBump.animateNow()">
+          Bump it!
+        </button>
       </div>
     </ng-container>
     <ng-template #resetBump>

@@ -1,4 +1,4 @@
-import { fromEvent, Observable, of, race, Subject, timer } from 'rxjs';
+import { fromEvent, Observable, of, race, Subject, Subscription, timer } from 'rxjs';
 import { filter, first } from 'rxjs/operators';
 
 /**
@@ -28,17 +28,18 @@ function getAnimationDurationInMillis(element: Element): number {
 }
 
 /**
- * Animates the given element using the given animation. The animation's `onStart` method is called immediately, and
- * this method is supposed to trigger a CSS animation (typically by adding a CSS class to the element, which defines
+ * Returns a cold observable which, when subscribed, animates the given element using the given animation.
+ * The animation's `onStart` method is called on subscription.
+ * This `onStart` method is supposed to trigger a CSS animation (typically by adding a CSS class to the element, which defines
  * an animation). Then the duration of the animation is automatically obtained from the element. When the `animationend`
  * DOM event is emitted by the element or, by default (in case the event is never emitted), 20 milliseconds after the
- * end of the animation, the `onEnd` method of the animation, if any, is called. This method typically removes the CSS,
- * so that the animation can be re-executed again later.
+ * scheduled end of the animation, the `onEnd` method of the animation, if any, is called. This `onEnd` method typically removes
+ * the CSS class, so that the animation can be re-executed again later.
  * @param element the element to animate
  * @param animation the animation to apply on the element
  * @param synchronous if true, then the `onEnd` method of the animation is called synchronously, immediately
  * after the `onStart` method. This can be useful in tests, when you do not want the animation to take any time.
- * The returned observable, in that case, also emits synchronously, as soon as it is subscribed.
+ * The returned observable, in that case, also emits and completes synchronously, as soon as it is subscribed.
  * @return an Observable which emits a single time and then completes, once the animation is done.
  */
 export function animate(
@@ -46,27 +47,33 @@ export function animate(
   animation: CssAnimation,
   synchronous = false
 ): Observable<void> {
-  animation.onStart(element);
-  const onEnd = animation.onEnd || (() => {});
-  if (synchronous) {
-    onEnd(element);
-    return of(undefined);
-  }
-  const result = new Subject<void>();
-  const animationDuration = getAnimationDurationInMillis(element);
-  // emits once at the end of the animation
-  const animationEnd$ = fromEvent(element, 'animationend').pipe(
-    filter(({ target }) => target === element),
-    first()
-  );
-  // emits once some time after the animation end, just in case the animationend event is not emitted
-  const timeElapsed$ = timer(animationDuration + 20);
-  race(animationEnd$, timeElapsed$).subscribe(() => {
-    onEnd(element);
-    result.next(undefined);
-    result.complete();
+  return new Observable(observer => {
+    animation.onStart(element);
+    const onEnd = animation.onEnd ?? (() => {});
+    let subscription: Subscription | null = null;
+    if (synchronous) {
+      observer.next();
+      observer.complete();
+    } else {
+      const animationDuration = getAnimationDurationInMillis(element);
+      // emits once at the end of the animation
+      const animationEnd$ = fromEvent(element, 'animationend').pipe(
+        filter(({ target }) => target === element),
+        first()
+      );
+      // emits once some time after the animation end, just in case the animationend event is not emitted
+      const timeElapsed$ = timer(animationDuration + 20);
+      subscription = race(animationEnd$, timeElapsed$).subscribe(() => {
+        observer.next(undefined);
+        observer.complete();
+      });
+    }
+
+    return () => {
+      subscription?.unsubscribe();
+      onEnd(element);
+    };
   });
-  return result.asObservable();
 }
 
 /**

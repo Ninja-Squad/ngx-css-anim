@@ -1,27 +1,88 @@
 # NgxCssAnim
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 10.0.7.
+A tiny Angular library to run CSS animations, without using the Angular animations module.
 
-## Development server
+## Rationale
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+Let's face it, Angular animations are complex, and you typically don't use them every day, making
+the task even more painful.
 
-## Code scaffolding
+Adding the Angular browser animations module has a non-negligible impact on the bundle size, 
+can have side-effects on your tests, and can be completely overkill if all you want to have is 
+just a few simple CSS animations.
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+This library doesn't use the Angular browser animations module at all, but instead allows you to
+execute CSS animations, typically by adding a CSS class to start the animation, and removing it once
+the animation is done.
 
-## Build
+This allows you to instantly benefit from ready-made CSS animations such as the ones provided by 
+[Animate.css](https://animate.style/).
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
+## How to use
 
-## Running unit tests
+The core of the library is the function `animate()`. It's perfectly fine to call it directly. All you need
+is to get a reference to the element to animate. For example:
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+```
+@Component({
+  template: `
+     ...
+     <div #someDiv>...</div>
+     <button (click)="onClick($event.target)">Click</button>
+  `
+})
+class MyComponent {
+  @ViewChild('someDiv') someDiv: ElementRef<HTMLDivElement>;
 
-## Running end-to-end tests
+  constructor(private animationConfig: AnimationConfig) { }
 
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
+  onClick(button: HTMLButtonElement) {
+    const shake = classBasedAnimation('shake');
+    // animate the button
+    animate(button, shake, this.animationConfig.animationsDisabled).subscribe(); 
 
-## Further help
+    // animate the div
+    animate(someDiv.nativeElement, shake, this.animationConfig.animationsDisabled).subscribe(); 
+  }
+}
+```
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+Note that the `AnimationConfig` service is used to be able (in tests most of the time), to run
+the animations synchronously, thus avoiding to have to use asynchronous tests.
+
+The same can be achieved using the `anImate` directive, which automatically honors the 
+animation configuration. For example:
+
+```
+@Component({
+  template: `
+     ...
+     <div anImate="shake" #div="anImate">...</div>
+     <button anImate="shake" #btn="anImate" (click)="btn.animateNow(); div.animateNow()">Click</button>
+  `
+})
+class MyComponent {
+  readonly shake = classBasedAnimation('shake');
+}
+```
+
+or, to be able to do something other than just animating:
+
+```
+@Component({
+  template: `
+     ...
+     <div anImate="shake" #div="anImate">...</div>
+     <button anImate="shake" #btn="anImate" (click)="onClick(btn.animate(), div.animate())">Click</button>
+  `
+})
+class MyComponent {
+  readonly shake = classBasedAnimation('shake');
+
+  onClick(btnAnimation$: Observable<void>, divAnimation$: Observable<void>) {
+    // wait until the two animations are done and then do something 
+    forkJoin(btnAnimation$, divAnimation$).subscribe(() => doSomethingElse());
+  }
+}
+```
+

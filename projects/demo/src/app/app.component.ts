@@ -12,6 +12,7 @@ export class AppComponent {
   readonly slideInAnimation = classBasedAnimation('slide-in');
   readonly bumpAnimation = classBasedAnimation('bump');
   showBump = true;
+  readonly bounceAnimation = classBasedAnimation('animate__bounce');
 
   constructor(private config: AnimationConfig) {}
 
