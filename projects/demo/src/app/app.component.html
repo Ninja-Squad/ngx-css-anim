@@ -12,7 +12,7 @@
   </div>
 
   <div class="d-flex align-items-center flex-column my-2">
-    <div class="border rounded mb-4 p-2" [cssAnimate]="slideInAnimation" [animateOnInit]="true">
+    <div class="border rounded mb-4 p-2" [anImate]="slideInAnimation" [animateOnInit]="true">
       I'll slide in when the component is initialized
     </div>
   </div>
@@ -20,7 +20,7 @@
   <hr />
 
   <div class="d-flex align-items-center flex-column my-2">
-    <div class="border rounded mb-4 p-2" [cssAnimate]="shakeAnimation" #toShake="cssAnimate">
+    <div class="border rounded mb-4 p-2" [anImate]="shakeAnimation" #toShake="anImate">
       I'll shake when the button is clicked
     </div>
     <div>
@@ -34,8 +34,8 @@
     <ng-container *ngIf="showBump; else resetBump">
       <div
         class="border rounded mb-4 p-2"
-        [cssAnimate]="bumpAnimation"
-        #toBump="cssAnimate"
+        [anImate]="bumpAnimation"
+        #toBump="anImate"
         (animationEnd)="showBump = false"
       >
         I'll bump and then disappear

@@ -11,7 +11,7 @@ import { CssAnimation, animate } from './animation';
  * ```
  * @Component({
  *   template: `
- *     <div [cssAnimate]="shakeAnimation" #toShake="cssAnimate">I'll shake when the button is clicked</div>
+ *     <div [anImate]="shakeAnimation" #toShake="anImate">I'll shake when the button is clicked</div>
  *     <button type="button" (click)="toShake.animate()">Shake the div</button>
  *   `
  * }
@@ -24,7 +24,7 @@ import { CssAnimation, animate } from './animation';
  *
  * ```
  * @Component({
- *   template: `<div [cssAnimate]="shakeAnimation" [animateOnInit]="true">I'll shake when the component view is initialized</div>`
+ *   template: `<div [anImate]="shakeAnimation" [animateOnInit]="true">I'll shake when the component view is initialized</div>`
  * }
  * class MyComponent implements AfterViewInit {
  *   shakeAnimation = classBasedAnimation('shake');
@@ -32,11 +32,11 @@ import { CssAnimation, animate } from './animation';
  * ```
  */
 @Directive({
-  selector: '[cssAnimate]',
-  exportAs: 'cssAnimate'
+  selector: '[anImate]',
+  exportAs: 'anImate'
 })
 export class AnimateDirective implements AfterViewInit {
-  @Input('cssAnimate') animation: CssAnimation;
+  @Input('anImate') animation: CssAnimation;
   @Input() animateOnInit: boolean;
   @Output() readonly animationEnd = new EventEmitter<void>();
 

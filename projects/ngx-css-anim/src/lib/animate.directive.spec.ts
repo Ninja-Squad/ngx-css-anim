@@ -7,10 +7,10 @@ import { AnimationConfig, NgxCssAnimModule } from 'ngx-css-anim';
 @Component({
   template: `
     <div
-      [cssAnimate]="animation"
+      [anImate]="animation"
       [animateOnInit]="onInit"
       (animationEnd)="done = true"
-      #div="cssAnimate"
+      #div="anImate"
     ></div>
     <button (click)="div.animate()"></button>
   `,
