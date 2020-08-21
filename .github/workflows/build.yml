@@ -1,0 +1,20 @@
+name: CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
+      - run: yarn install
+      - run: yarn format:check
+      - run: yarn lint
+      - run: yarn build
+      - run: yarn test --code-coverage --no-watch
