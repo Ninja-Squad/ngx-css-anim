@@ -1,6 +1,9 @@
 import { Component } from '@angular/core';
-import { classBasedAnimation } from '../../../ngx-css-anim/src/lib/animation';
-import { AnimationConfig } from 'ngx-css-anim';
+import { AnimationConfig, animate, classBasedAnimation } from 'ngx-css-anim';
+
+interface Person {
+  name: string;
+}
 
 @Component({
   selector: 'app-root',
@@ -11,9 +14,13 @@ export class AppComponent {
   readonly shakeAnimation = classBasedAnimation('shake');
   readonly slideInAnimation = classBasedAnimation('slide-in');
   readonly bumpAnimation = classBasedAnimation('bump');
+  readonly fadeInAnimation = classBasedAnimation('fade-in');
   showBump = true;
+  persons: Array<Person>;
 
-  constructor(private config: AnimationConfig) {}
+  constructor(private config: AnimationConfig) {
+    this.resetPersons();
+  }
 
   get animationsEnabled(): boolean {
     return !this.config.animationsDisabled;
@@ -21,5 +28,26 @@ export class AppComponent {
 
   set animationsEnabled(enabled: boolean) {
     this.config.animationsDisabled = !enabled;
+  }
+
+  removePerson(element: HTMLElement, index: number): void {
+    animate(element, classBasedAnimation('fade-out'), this.config.animationsDisabled).subscribe(
+      () => {
+        this.persons.splice(index, 1);
+      }
+    );
+  }
+
+  resetPersons(): void {
+    this.persons = [
+      'Agnès Crépet',
+      'Cédric Exbrayat',
+      'Cyril Lacote',
+      'Jean-Baptiste Nizet'
+    ].map(name => ({ name }));
+  }
+
+  personName(index: number, person: Person): string {
+    return person.name;
   }
 }

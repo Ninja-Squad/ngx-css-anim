@@ -1,4 +1,4 @@
-<div class="container mt-5">
+<div class="container mt-2">
   <div class="text-right">
     <div class="custom-control custom-switch">
       <input
@@ -12,7 +12,11 @@
   </div>
 
   <div class="d-flex align-items-center flex-column my-2">
-    <div class="border rounded mb-4 p-2" [anImate]="slideInAnimation" [animateOnInit]="true">
+    <div
+      class="border rounded mb-2 p-2 bg-light"
+      [anImate]="slideInAnimation"
+      [animateOnInit]="true"
+    >
       I'll slide in when the component is initialized
     </div>
   </div>
@@ -20,7 +24,7 @@
   <hr />
 
   <div class="d-flex align-items-center flex-column my-2">
-    <div class="border rounded mb-4 p-2" [anImate]="shakeAnimation" #toShake="anImate">
+    <div class="border rounded mb-2 p-2 bg-light" [anImate]="shakeAnimation" #toShake="anImate">
       I'll shake when the button is clicked
     </div>
     <div>
@@ -35,7 +39,7 @@
   <div class="d-flex align-items-center flex-column my-2">
     <ng-container *ngIf="showBump; else resetBump">
       <div
-        class="border rounded mb-4 p-2"
+        class="border rounded mb-2 p-2 bg-light"
         [anImate]="bumpAnimation"
         #toBump="anImate"
         (animationEnd)="showBump = false"
@@ -50,10 +54,50 @@
     </ng-container>
     <ng-template #resetBump>
       <div>
-        <button type="button" class="btn btn-outline-primary" (click)="showBump = true">
+        <button
+          type="button"
+          class="btn btn-outline-primary"
+          (click)="showBump = true"
+          [anImate]="fadeInAnimation"
+          [animateOnInit]="true"
+        >
           Reset
         </button>
       </div>
     </ng-template>
+  </div>
+
+  <hr />
+
+  <div class="d-flex align-items-center flex-column my-2">
+    <div class="mb-2">
+      <div
+        *ngFor="let person of persons; trackBy: personName; index as i"
+        class="border rounded my-1 d-flex p-2 bg-light"
+        [anImate]="fadeInAnimation"
+        [animateOnInit]="true"
+        #personElement
+      >
+        <div class="flex-grow-1 mr-5">{{ person.name }}</div>
+        <div class="align-self-center">
+          <button type="button" class="close" (click)="removePerson(personElement, i)">
+            <span aria-hidden="true">&times;</span>
+            <span class="sr-only">Remove</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div>
+      <button
+        *ngIf="persons.length < 4"
+        type="button"
+        class="btn btn-outline-primary"
+        (click)="resetPersons()"
+        [anImate]="fadeInAnimation"
+        [animateOnInit]="true"
+      >
+        Reset
+      </button>
+    </div>
   </div>
 </div>
