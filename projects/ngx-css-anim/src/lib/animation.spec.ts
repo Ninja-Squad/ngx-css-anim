@@ -2,12 +2,14 @@ import { animate, classBasedAnimation, CssAnimation } from './animation';
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { Component } from '@angular/core';
 import { ComponentTester, speculoosMatchers, TestHtmlElement } from 'ngx-speculoos';
+import { takeUntil } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 
 @Component({
   template: '<div></div>',
   styles: [
     `
-      @keyframes foo {
+      @keyframes animated {
         from {
           opacity: 0;
         }
@@ -17,8 +19,8 @@ import { ComponentTester, speculoosMatchers, TestHtmlElement } from 'ngx-speculo
         }
       }
 
-      .foo {
-        animation: foo 300ms ease;
+      .animated {
+        animation: animated 300ms ease;
       }
     `
   ]
@@ -40,7 +42,7 @@ describe('animation', () => {
   let animation: CssAnimation;
 
   beforeEach(() => {
-    animation = classBasedAnimation('foo');
+    animation = classBasedAnimation('animated');
     TestBed.configureTestingModule({
       declarations: [TestComponent]
     });
@@ -52,13 +54,25 @@ describe('animation', () => {
   });
 
   it('should create a class-based animation', () => {
-    expect(tester.div).not.toHaveClass('foo');
+    expect(tester.div).not.toHaveClass('animated');
 
     animation.onStart(tester.div.nativeElement);
-    expect(tester.div).toHaveClass('foo');
+    expect(tester.div).toHaveClass('animated');
 
     animation.onEnd(tester.div.nativeElement);
-    expect(tester.div).not.toHaveClass('foo');
+    expect(tester.div).not.toHaveClass('animated');
+  });
+
+  it('should return a cold observable', () => {
+    const observable = animate(tester.div.nativeElement, animation);
+    tester.detectChanges();
+
+    expect(tester.div).not.toHaveClass('animated');
+
+    observable.subscribe();
+    tester.detectChanges();
+
+    expect(tester.div).toHaveClass('animated');
   });
 
   it('should animate by reacting to animationend event', () => {
@@ -69,13 +83,13 @@ describe('animation', () => {
       complete: () => (done = true)
     });
     tester.detectChanges();
-    expect(tester.div).toHaveClass('foo');
+    expect(tester.div).toHaveClass('animated');
     expect(eventCount).toBe(0);
     expect(done).toBe(false);
 
     tester.div.dispatchEventOfType('animationend');
 
-    expect(tester.div).not.toHaveClass('foo');
+    expect(tester.div).not.toHaveClass('animated');
     expect(eventCount).toBe(1);
     expect(done).toBe(true);
   });
@@ -88,14 +102,14 @@ describe('animation', () => {
       complete: () => (done = true)
     });
     tester.detectChanges();
-    expect(tester.div).toHaveClass('foo');
+    expect(tester.div).toHaveClass('animated');
     expect(eventCount).toBe(0);
     expect(done).toBe(false);
 
     tick(350);
     tester.detectChanges();
 
-    expect(tester.div).not.toHaveClass('foo');
+    expect(tester.div).not.toHaveClass('animated');
     expect(eventCount).toBe(1);
     expect(done).toBe(true);
   }));
@@ -112,7 +126,7 @@ describe('animation', () => {
       complete: () => (done = true)
     });
     tester.detectChanges();
-    expect(tester.div).not.toHaveClass('foo');
+    expect(tester.div).not.toHaveClass('animated');
     expect(eventCount).toBe(1);
     expect(done).toBe(true);
     expect(animation.onStart).toHaveBeenCalled();
@@ -121,7 +135,7 @@ describe('animation', () => {
 
   it('should animate when no onEnd', () => {
     const noOnEndAnimation: CssAnimation = {
-      onStart: el => el.classList.add('foo')
+      onStart: el => el.classList.add('animated')
     };
 
     let eventCount = 0;
@@ -131,14 +145,28 @@ describe('animation', () => {
       complete: () => (done = true)
     });
     tester.detectChanges();
-    expect(tester.div).toHaveClass('foo');
+    expect(tester.div).toHaveClass('animated');
     expect(eventCount).toBe(0);
     expect(done).toBe(false);
 
     tester.div.dispatchEventOfType('animationend');
 
-    expect(tester.div).toHaveClass('foo');
+    expect(tester.div).toHaveClass('animated');
     expect(eventCount).toBe(1);
     expect(done).toBe(true);
   });
+
+  it('should call onEnd when animation is interrupted', fakeAsync(() => {
+    const interruption = new Subject<void>();
+    animate(tester.div.nativeElement, animation).pipe(takeUntil(interruption)).subscribe();
+    tester.detectChanges();
+    expect(tester.div).toHaveClass('animated');
+
+    tick(100);
+    interruption.next();
+    interruption.complete();
+
+    tester.detectChanges();
+    expect(tester.div).not.toHaveClass('animated');
+  }));
 });

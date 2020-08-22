@@ -2,7 +2,8 @@ import { classBasedAnimation } from './animation';
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { Component } from '@angular/core';
 import { ComponentTester, speculoosMatchers, TestButton, TestHtmlElement } from 'ngx-speculoos';
-import { AnimationConfig, NgxCssAnimModule } from 'ngx-css-anim';
+import { AnimationConfig } from './animation-config.service';
+import { NgxCssAnimModule } from './ngx-css-anim.module';
 import { Observable } from 'rxjs';
 
 @Component({
@@ -18,7 +19,7 @@ import { Observable } from 'rxjs';
   `,
   styles: [
     `
-      @keyframes foo {
+      @keyframes animated {
         from {
           opacity: 0;
         }
@@ -28,14 +29,14 @@ import { Observable } from 'rxjs';
         }
       }
 
-      .foo {
+      .animated {
         animation: foo 300ms ease;
       }
     `
   ]
 })
 class TestComponent {
-  animation = classBasedAnimation('foo');
+  animation = classBasedAnimation('animated');
   onInit = false;
   done = false;
   somethingDone = false;
@@ -79,16 +80,16 @@ describe('animate directive', () => {
 
   it('should animate imperatively', fakeAsync(() => {
     tester.detectChanges();
-    expect(tester.div).not.toHaveClass('foo');
+    expect(tester.div).not.toHaveClass('animated');
 
     tester.animateButton.click();
 
-    expect(tester.div).toHaveClass('foo');
+    expect(tester.div).toHaveClass('animated');
     expect(tester.componentInstance.done).toBeFalse();
 
     tick(350);
 
-    expect(tester.div).not.toHaveClass('foo');
+    expect(tester.div).not.toHaveClass('animated');
     expect(tester.componentInstance.done).toBeTrue();
   }));
 
@@ -96,12 +97,12 @@ describe('animate directive', () => {
     tester.componentInstance.onInit = true;
     tester.detectChanges();
 
-    expect(tester.div).toHaveClass('foo');
+    expect(tester.div).toHaveClass('animated');
     expect(tester.componentInstance.done).toBeFalse();
 
     tick(350);
 
-    expect(tester.div).not.toHaveClass('foo');
+    expect(tester.div).not.toHaveClass('animated');
     expect(tester.componentInstance.done).toBeTrue();
   }));
 
@@ -111,7 +112,7 @@ describe('animate directive', () => {
 
     tester.animateButton.click();
 
-    expect(tester.div).not.toHaveClass('foo');
+    expect(tester.div).not.toHaveClass('animated');
     expect(tester.componentInstance.done).toBeTrue();
   });
 
@@ -120,13 +121,13 @@ describe('animate directive', () => {
 
     tester.doSomethingButton.click();
 
-    expect(tester.div).toHaveClass('foo');
+    expect(tester.div).toHaveClass('animated');
     expect(tester.componentInstance.done).toBeFalse();
     expect(tester.componentInstance.somethingDone).toBeFalse();
 
     tick(350);
 
-    expect(tester.div).not.toHaveClass('foo');
+    expect(tester.div).not.toHaveClass('animated');
     expect(tester.componentInstance.done).toBeTrue();
     expect(tester.componentInstance.somethingDone).toBeTrue();
   }));

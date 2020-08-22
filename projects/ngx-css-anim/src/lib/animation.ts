@@ -1,4 +1,4 @@
-import { fromEvent, Observable, of, race, Subject, Subscription, timer } from 'rxjs';
+import { fromEvent, Observable, race, Subscription, timer } from 'rxjs';
 import { filter, first } from 'rxjs/operators';
 
 /**
