@@ -1,13 +1,20 @@
 <div class="container mt-2">
-  <div class="text-right">
-    <div class="custom-control custom-switch">
-      <input
-        type="checkbox"
-        class="custom-control-input"
-        id="toggle-animations"
-        [(ngModel)]="animationsEnabled"
-      />
-      <label class="custom-control-label" for="toggle-animations">Enable animations</label>
+  <div class="row">
+    <div class="col">
+      <a href="https://github.com/Ninja-Squad/ngx-css-anim/tree/master/projects/demo/src/app"
+        >Source code of this demo</a
+      >
+    </div>
+    <div class="col text-right">
+      <div class="custom-control custom-switch">
+        <input
+          type="checkbox"
+          class="custom-control-input"
+          id="toggle-animations"
+          [(ngModel)]="animationsEnabled"
+        />
+        <label class="custom-control-label" for="toggle-animations">Enable animations</label>
+      </div>
     </div>
   </div>
 
@@ -97,6 +104,25 @@
         [animateOnInit]="true"
       >
         Reset
+      </button>
+    </div>
+  </div>
+
+  <hr />
+
+  <div class="d-flex align-items-center flex-column my-2">
+    <div class="mb-2">
+      <div
+        *ngFor="let person of chainedPersons; trackBy: personName; index as i"
+        class="border rounded my-1 d-flex p-2 bg-light"
+        #chainedPersonElement
+      >
+        {{ person.name }}
+      </div>
+    </div>
+    <div>
+      <button type="button" class="btn btn-primary" (click)="bumpChainedPersons()">
+        Bump them one by one!
       </button>
     </div>
   </div>

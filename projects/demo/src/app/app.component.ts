@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
-import { AnimationConfig, animate, classBasedAnimation } from 'ngx-css-anim';
+import { Component, ElementRef, QueryList, ViewChildren } from '@angular/core';
+import { animate, AnimationConfig, classBasedAnimation } from 'ngx-css-anim';
+import { concat } from 'rxjs';
 
 interface Person {
   name: string;
@@ -17,6 +18,9 @@ export class AppComponent {
   readonly fadeInAnimation = classBasedAnimation('fade-in');
   showBump = true;
   persons: Array<Person>;
+  chainedPersons = this.allPersons();
+
+  @ViewChildren('chainedPersonElement') chainedPersonElements: QueryList<ElementRef<HTMLElement>>;
 
   constructor(private config: AnimationConfig) {
     this.resetPersons();
@@ -39,15 +43,25 @@ export class AppComponent {
   }
 
   resetPersons(): void {
-    this.persons = [
-      'Agnès Crépet',
-      'Cédric Exbrayat',
-      'Cyril Lacote',
-      'Jean-Baptiste Nizet'
-    ].map(name => ({ name }));
+    this.persons = this.allPersons();
   }
 
   personName(index: number, person: Person): string {
     return person.name;
+  }
+
+  bumpChainedPersons(): void {
+    const animations = this.chainedPersonElements.map(el =>
+      animate(el.nativeElement, this.bumpAnimation, this.config.animationsDisabled)
+    );
+    concat(...animations).subscribe(() => {
+      console.log('done');
+    });
+  }
+
+  private allPersons(): Array<Person> {
+    return ['Agnès Crépet', 'Cédric Exbrayat', 'Cyril Lacote', 'Jean-Baptiste Nizet'].map(name => ({
+      name
+    }));
   }
 }
