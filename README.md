@@ -23,12 +23,12 @@ This allows you to instantly benefit from ready-made CSS animations such as the 
 The core of the library is the function `animate()`. It's perfectly fine to call it directly. All you need
 is to get a reference to the element to animate. For example:
 
-```
+```typescript
 @Component({
   template: `
-     ...
-     <div #someDiv>...</div>
-     <button (click)="onClick($event.target)">Click</button>
+    ...
+    <div #someDiv>...</div>
+    <button (click)="onClick($event.target)">Click</button>
   `
 })
 class MyComponent {
@@ -53,12 +53,12 @@ the animations synchronously, thus avoiding to have to use asynchronous tests.
 The same can be achieved using the `anImate` directive, which automatically honors the 
 animation configuration. For example:
 
-```
+```typescript
 @Component({
   template: `
-     ...
-     <div anImate="shake" #div="anImate">...</div>
-     <button anImate="shake" #btn="anImate" (click)="btn.animateNow(); div.animateNow()">Click</button>
+    ...
+    <div [anImate]="shake" #div="anImate">...</div>
+    <button [anImate]="shake" #btn="anImate" (click)="btn.animateNow(); div.animateNow()">Click</button>
   `
 })
 class MyComponent {
@@ -68,12 +68,12 @@ class MyComponent {
 
 or, to be able to do something other than just animating:
 
-```
+```typescript
 @Component({
   template: `
-     ...
-     <div anImate="shake" #div="anImate">...</div>
-     <button anImate="shake" #btn="anImate" (click)="onClick(btn.animate(), div.animate())">Click</button>
+    ...
+    <div [anImate]="shake" #div="anImate">...</div>
+    <button [anImate]="shake" #btn="anImate" (click)="onClick(btn.animate(), div.animate())">Click</button>
   `
 })
 class MyComponent {
@@ -86,3 +86,23 @@ class MyComponent {
 }
 ```
 
+If you want an animation to run as soon as an element appears on the page, you can
+set the `animateOnInit` input to `true`. And to be notified when the animation ends,
+you can use the `animationEnd` output:
+
+```typescript
+@Component({
+  template: `
+    <div [anImate]="shake" [animateOnInit]="true" (animationEnd)="ended()">...</div>
+  `
+})
+class MyComponent {
+  readonly shake = classBasedAnimation('shake');
+
+  ended() {
+    console.log('the animation has ended'); 
+  }
+}
+```
+
+For more information, check the API documentation.
