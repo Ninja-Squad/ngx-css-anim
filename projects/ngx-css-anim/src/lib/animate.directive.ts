@@ -85,7 +85,7 @@ export class AnimateDirective implements AfterViewInit {
       this.elementRef.nativeElement,
       animationToExecute,
       this.config.animationsDisabled
-    ).pipe(tap(() => this.animationEnd.emit()));
+    ).pipe(tap({ complete: () => this.animationEnd.emit() }));
   }
 
   /**

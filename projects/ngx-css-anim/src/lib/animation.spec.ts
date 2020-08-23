@@ -20,7 +20,7 @@ import { Subject } from 'rxjs';
       }
 
       .animated {
-        animation: animated 300ms ease;
+        animation: animated 100ms ease;
       }
     `
   ]
@@ -75,6 +75,22 @@ describe('animation', () => {
     expect(tester.div).toHaveClass('animated');
   });
 
+  it('should call onEnd, then emit, then complete', (done: DoneFn) => {
+    let eventCount = 0;
+    animate(tester.div.nativeElement, animation).subscribe({
+      next: () => {
+        expect(tester.div).not.toHaveClass('animated');
+        eventCount++;
+      },
+      complete: () => {
+        expect(eventCount).toBe(1);
+        done();
+      }
+    });
+    expect(tester.div).toHaveClass('animated');
+    expect(eventCount).toBe(0);
+  });
+
   it('should animate by reacting to animationend event', () => {
     let eventCount = 0;
     let done = false;
@@ -106,7 +122,7 @@ describe('animation', () => {
     expect(eventCount).toBe(0);
     expect(done).toBe(false);
 
-    tick(350);
+    tick(1250);
     tester.detectChanges();
 
     expect(tester.div).not.toHaveClass('animated');
@@ -162,7 +178,7 @@ describe('animation', () => {
     tester.detectChanges();
     expect(tester.div).toHaveClass('animated');
 
-    tick(100);
+    tick(50);
     interruption.next();
     interruption.complete();
 

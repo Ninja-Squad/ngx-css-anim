@@ -33,14 +33,17 @@ function getAnimationDurationInMillis(element: Element): number {
  * This `onStart` method is supposed to trigger a CSS animation (typically by adding a CSS class to the element, which defines
  * an animation). Then the duration of the animation is automatically obtained from the element. When the `animationend`
  * DOM event is emitted by the element or, by default (in case the event is never emitted), 20 milliseconds after the
- * scheduled end of the animation, the `onEnd` method of the animation, if any, is called. This `onEnd` method typically removes
- * the CSS class, so that the animation can be re-executed again later.
+ * scheduled end of the animation, the `onEnd` method of the animation, if any, is called.
+ * This `onEnd` method typically removes the CSS class, so that the animation can be re-executed again later.
+ * Then, the observable emits and completes to signal the end of the animation.
+ * If the returned observable is unsubscribed before it has emitted, the `onEnd` method is also called.
  * @param element the element to animate
  * @param animation the animation to apply on the element
  * @param synchronous if true, then the `onEnd` method of the animation is called synchronously, immediately
- * after the `onStart` method. This can be useful in tests, when you do not want the animation to take any time.
- * The returned observable, in that case, also emits and completes synchronously, as soon as it is subscribed.
- * @return an Observable which emits a single time and then completes, once the animation is done.
+ * after the `onStart` method, and the returned observable also emits and completes synchronously.
+ * This can be useful in tests, when you do not want the animation to take any time.
+ * @return an Observable which emits a single time and then completes, once the animation is done and the `onEnd` method has been
+ * called.
  */
 export function animate(
   element: HTMLElement,
@@ -50,8 +53,16 @@ export function animate(
   return new Observable(observer => {
     animation.onStart(element);
     const onEnd = animation.onEnd ?? (() => {});
+    let onEndCalled = false;
+    const terminate = () => {
+      if (!onEndCalled) {
+        onEndCalled = true;
+        onEnd(element);
+      }
+    };
     let subscription: Subscription | null = null;
     if (synchronous) {
+      terminate();
       observer.next();
       observer.complete();
     } else {
@@ -64,6 +75,7 @@ export function animate(
       // emits once some time after the animation end, just in case the animationend event is not emitted
       const timeElapsed$ = timer(animationDuration + 20);
       subscription = race(animationEnd$, timeElapsed$).subscribe(() => {
+        terminate();
         observer.next(undefined);
         observer.complete();
       });
@@ -71,7 +83,7 @@ export function animate(
 
     return () => {
       subscription?.unsubscribe();
-      onEnd(element);
+      terminate();
     };
   });
 }
