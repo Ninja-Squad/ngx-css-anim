@@ -92,17 +92,16 @@ class MyComponent {
 
 If you want an animation to run as soon as an element appears on the page, you can
 set the `animateOnInit` input to `true`. And to be notified when the animation ends,
-you can use the `animationEnd` output:
+you can use the `animationEnd` output. Finally, since class based animations are common,
+you can pass a class name as input rather than a `CssAnimation` instance:
 
 ```typescript
 @Component({
   template: `
-    <div [anImate]="shake" [animateOnInit]="true" (animationEnd)="ended()">...</div>
+    <div anImate="shake" [animateOnInit]="true" (animationEnd)="ended()">...</div>
   `
 })
 class MyComponent {
-  readonly shake = classBasedAnimation('shake');
-
   ended() {
     console.log('the animation has ended'); 
   }

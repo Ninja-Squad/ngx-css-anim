@@ -1,13 +1,14 @@
 import { AfterViewInit, Directive, ElementRef, Input, Output, EventEmitter } from '@angular/core';
 import { AnimationConfig } from './animation-config.service';
-import { CssAnimation, animate } from './animation';
+import { CssAnimation, animate, classBasedAnimation } from './animation';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
 /**
  * Directive allowing to animate its host element.
  * The directive is exported as `'cssAnimate'` which allows getting a reference to the directive.`
- * The animation can imperatively be executed when some event occurs by calling the `animate()` method.
+ * The animation can imperatively be executed when some event occurs by calling the `animate()` method
+ * and subscribing to the returned observable, or by calling `animateNow()`.
  *
  * For example:
  * ```
@@ -34,7 +35,7 @@ import { tap } from 'rxjs/operators';
  * ```
  *
  * Often, clicking a button must do more than just executing an animation. To combine an additional
- * treatment with the animation, you can call `animate()` instead of `animateNow()`, and pass the returned cold observable
+ * treatment with the animation, you can call `animate()`, and pass the returned cold observable
  * to a method of the component, which can then use RxJS to do something else once the animation is done, or while the animation
  * is running.
  *
@@ -53,6 +54,18 @@ import { tap } from 'rxjs/operators';
  *   }
  * }
  * ```
+ *
+ * Since class-based animations are quite common, you can directly pass a class name as input instead of a `CssAnimation`
+ * instance:
+ *
+ * ```
+ * @Component({
+ *   template: `<div anImate="shake" [animateOnInit]="true">I'll shake when the component view is initialized</div>`
+ * }
+ * class MyComponent {
+ *   // no need to create a CssAnimation anymore
+ * }
+ * ```
  */
 @Directive({
   selector: '[anImate]',
@@ -60,9 +73,10 @@ import { tap } from 'rxjs/operators';
 })
 export class AnimateDirective implements AfterViewInit {
   /**
-   * The CssAnimation that the directive must execute
+   * The CssAnimation that the directive must execute, or a CSS class name used to create a class-based animation
+   * (consisting in adding the CSS class to start the animation, and removing it once it's done)
    */
-  @Input('anImate') animation: CssAnimation;
+  @Input('anImate') animation: CssAnimation | string;
 
   /**
    * If true, the animation is executed when the view of the directive is initialized
@@ -80,7 +94,8 @@ export class AnimateDirective implements AfterViewInit {
    * Returns an observable which executes the animation on the host element of the directive when subscribed
    */
   animate(): Observable<void> {
-    const animationToExecute = this.animation;
+    const animationToExecute: CssAnimation =
+      typeof this.animation === 'string' ? classBasedAnimation(this.animation) : this.animation;
     return animate(
       this.elementRef.nativeElement,
       animationToExecute,

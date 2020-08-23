@@ -1,4 +1,4 @@
-import { classBasedAnimation } from './animation';
+import { classBasedAnimation, CssAnimation } from './animation';
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { Component } from '@angular/core';
 import { ComponentTester, speculoosMatchers, TestButton, TestHtmlElement } from 'ngx-speculoos';
@@ -36,7 +36,7 @@ import { Observable } from 'rxjs';
   ]
 })
 class TestComponent {
-  animation = classBasedAnimation('animated');
+  animation: CssAnimation | string = classBasedAnimation('animated');
   onInit = false;
   done = false;
   somethingDone = false;
@@ -116,7 +116,7 @@ describe('animate directive', () => {
     expect(tester.componentInstance.done).toBeTrue();
   });
 
-  it('should do something after the animation is don', fakeAsync(() => {
+  it('should do something after the animation is done', fakeAsync(() => {
     tester.detectChanges();
 
     tester.doSomethingButton.click();
@@ -130,5 +130,19 @@ describe('animate directive', () => {
     expect(tester.div).not.toHaveClass('animated');
     expect(tester.componentInstance.done).toBeTrue();
     expect(tester.componentInstance.somethingDone).toBeTrue();
+  }));
+
+  it('should accept class name as input', fakeAsync(() => {
+    tester.componentInstance.animation = 'animated';
+    tester.detectChanges();
+    expect(tester.div).not.toHaveClass('animated');
+
+    tester.animateButton.click();
+
+    expect(tester.div).toHaveClass('animated');
+
+    tick(350);
+
+    expect(tester.div).not.toHaveClass('animated');
   }));
 });

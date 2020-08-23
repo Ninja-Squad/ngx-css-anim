@@ -13,10 +13,7 @@ interface Person {
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  readonly shakeAnimation = classBasedAnimation('shake');
-  readonly slideInAnimation = classBasedAnimation('slide-in');
   readonly bumpAnimation = classBasedAnimation('bump');
-  readonly fadeInAnimation = classBasedAnimation('fade-in');
   showBump = true;
   persons: Array<Person>;
   chainedPersons = this.allPersons();
