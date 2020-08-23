@@ -50,6 +50,10 @@ class MyComponent {
 Note that the `AnimationConfig` service is used to be able (in tests most of the time), to run
 the animations synchronously, thus avoiding to have to use asynchronous tests.
 
+Since an animation is triggered by subscribing to a cold observable, running animations in
+sequence, or in parallel, or chained the way you want to is only a matter of using RxJS
+functions such as `concat`, `forkJoin`, etc.
+
 The same can be achieved using the `anImate` directive, which automatically honors the 
 animation configuration. For example:
 

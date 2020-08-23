@@ -1,6 +1,7 @@
 import { Component, ElementRef, QueryList, ViewChildren } from '@angular/core';
 import { animate, AnimationConfig, classBasedAnimation } from 'ngx-css-anim';
-import { concat } from 'rxjs';
+import { concat, forkJoin, timer } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 
 interface Person {
   name: string;
@@ -54,9 +55,18 @@ export class AppComponent {
     const animations = this.chainedPersonElements.map(el =>
       animate(el.nativeElement, this.bumpAnimation, this.config.animationsDisabled)
     );
-    concat(...animations).subscribe(() => {
-      console.log('done');
-    });
+    concat(...animations).subscribe();
+  }
+
+  bumpChainedPersonsWithDelay(): void {
+    const animations = this.chainedPersonElements.map((el, i) =>
+      timer(i * 100).pipe(
+        switchMap(() =>
+          animate(el.nativeElement, this.bumpAnimation, this.config.animationsDisabled)
+        )
+      )
+    );
+    forkJoin(...animations).subscribe();
   }
 
   private allPersons(): Array<Person> {
