@@ -93,7 +93,7 @@ export function animate(
  * is done.
  * @param className the CSS class to add and remove to/from the element
  */
-export function classBasedAnimation(className): CssAnimation {
+export function classBasedAnimation(className: string): CssAnimation {
   return {
     onStart: el => el.classList.add(className),
     onEnd: el => el.classList.remove(className)

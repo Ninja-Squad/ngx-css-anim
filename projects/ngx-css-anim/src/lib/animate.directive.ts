@@ -76,12 +76,12 @@ export class AnimateDirective implements AfterViewInit {
    * The CssAnimation that the directive must execute, or a CSS class name used to create a class-based animation
    * (consisting in adding the CSS class to start the animation, and removing it once it's done)
    */
-  @Input('anImate') animation: CssAnimation | string;
+  @Input('anImate') animation!: CssAnimation | string;
 
   /**
    * If true, the animation is executed when the view of the directive is initialized
    */
-  @Input() animateOnInit: boolean;
+  @Input() animateOnInit = false;
 
   /**
    * Emits when the animation ends

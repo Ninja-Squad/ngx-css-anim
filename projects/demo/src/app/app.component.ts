@@ -63,7 +63,7 @@ export class AppComponent {
         )
       )
     );
-    forkJoin(...animations).subscribe();
+    forkJoin(animations).subscribe();
   }
 
   private allPersons(): Array<Person> {
