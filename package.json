@@ -44,7 +44,7 @@
     "ng-packagr": "10.1.2",
     "ngx-speculoos": "4.1.0",
     "prettier": "2.2.1",
-    "ts-node": "9.1.0",
+    "ts-node": "9.1.1",
     "tslint": "6.1.3",
     "typescript": "3.9.7"
   }
